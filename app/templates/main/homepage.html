@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>도서관 홈페이지</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <a href="{{ url_for('main.homepage') }}">ITE2038 Library</a>
+            </div>
+            <nav class="navigation">
+                <a href="#">menu1</a>
+                <a href="#">menu2</a>
+            </nav>
+            <div class="personal-info"> <!-- 개인정보 창 -->
+                {% if session.user_id %}
+                    <span>환영합니다, <strong>{{ session.user_name }}</strong>님!</span>
+                    <div class="buttons">
+                        <a href="{{ url_for('mypage.mypage') }}" class="btn">마이페이지</a>
+                        <a href="{{ url_for('auth.logout') }}" class="btn">로그아웃</a>
+                    </div>
+                {% else %}
+                    <span>로그인이 필요합니다</span>
+                    <div class="buttons">
+                        <a href="{{ url_for('auth.login') }}" class="btn">로그인</a>
+                    </div>
+                    {% endif %}
+            </div>
+        </header>
+
+        <main class="main-content">
+
+
+            <aside class="ranking-sidebar"> <!-- 랭킹 보여줄 부분-->
+                ranking
+            </aside>
+
+
+            <section class="new-books"> <!-- 새로 들어온 책 슬라이드로 보여줄 부분-->
+                <h2>New Books</h2>
+                <div class="slider-container">
+                    <div class="slider-wrapper">
+
+                        <!-- main/routes.py에서  return render_template('main/homepage.html', new_books = new_book_list) -->
+                        {% for book in new_books %} 
+                        <div class="book-slide">
+                            {% if loop.index is odd %}
+                                <img src="{{ url_for('static', filename='images/book_img_1.jpg') }}" alt="Book Icon 1">
+                            {% else %}
+                                <img src="{{ url_for('static', filename='images/book_img_2.jpg') }}" alt="Book Icon 2">
+                            {% endif %}
+                            <p class="book-title">{{ book.title }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <button class="slider-btn prev-btn">&lt;</button>
+                    <button class="slider-btn next-btn">&gt;</button>
+                </div>
+            </section>
+            <script src="{{ url_for('static', filename='js/slide.js') }}"></script>
+        </main>
+    </div>
+</body>
+</html>
