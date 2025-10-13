@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>DB 관리 페이지</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+    <div class="container">
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul class="flashes">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+            {% endif %}
+        {% endwith %}
+        <header class="header">
+            <div class="logo">
+                <a href="{{ url_for('main.homepage') }}">ITE2038 Library</a>
+            </div>
+            <nav class="navigation">
+                <a href="#">menu1</a>
+                <a href="#">menu2</a>
+            </nav>
+            <div class="personal-info"> <!-- 개인정보 창 -->
+                    <span>환영합니다, <strong>{{ session.user_name }}</strong>님!</span>
+                    <div class="buttons">
+                        <a href="{{ url_for('mypage.mypage') }}" class="btn">마이페이지</a>
+                            <a href="{{ url_for('mypage.adminpage') }}" class="btn">관리자 페이지</a>
+                        <a href="{{ url_for('auth.logout') }}" class="btn">로그아웃</a>
+                    </div>
+                
+            </div>
+        </header>
+
+        <main class="main-content">
+            <section class="admin-section">
+                <h2>DB 관리</h2>
+                <p class="description">책과 카테고리를 추가, 삭제, 관리합니다.</p>
+                
+                <div class="db-edit-container">
+                    <div class="edit-panel-edit">
+                        <h3>책 추가</h3>
+                        <form method="POST" class="edit-form">
+                            <input type="hidden" name="form_type" value="add_book">
+                            <div class="form-group">
+                                <label>책 제목</label>
+                                <input type="text" name="title" required>
+                            </div>
+                            <div class="form-group">
+                                <label>작가</label>
+                                <input type="text" name="author" required>
+                            </div>
+                            <div class="form-group">
+                                <label>카테고리 (중복 선택 가능)</label>
+                                <div class="checkbox-group">
+                                    {% for category in categories %}
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" name="categories" value="{{ category.category_id }}" id="cat_{{ category.category_id }}">
+                                        <label for="cat_{{ category.category_id }}">{{ category.category_name }}</label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-primary">책 추가</button>
+                        </form>
+                        
+                        <hr>
+                        <h3>전체 책 목록</h3>
+                        <div class="table-scroll-container">
+                        <table class="user-table">
+                            <thead>
+                                <tr><th>책ID</th><th>제목</th><th>작가</th><th>카테고리</th><th>삭제</th></tr>
+                            </thead>
+                        <tbody>
+                            {% for book in books %}
+                            <tr>
+                                <td>{{ book.book_id }}</td>
+                                <td>{{ book.title }}</td>
+                                <td>{{ book.author }}</td>
+                                <td>{{ book.categories or '없음' }}</td>
+                                <td>
+                                    {# book.is_rent가 True 또는 1일 경우 #}
+                                    {% if book.is_rent %}
+                                        <button type="button" class="btn-disabled" disabled>대여중</button>
+                                    
+                                    {# book.is_rent가 False 또는 0일 경우 #}
+                                    {% else %}
+                                        <form method="POST" onsubmit="return confirm('정말로 이 책을 삭제하시겠습니까?');">
+                                            <input type="hidden" name="form_type" value="delete_book">
+                                            <input type="hidden" name="book_id" value="{{ book.book_id }}">
+                                            <button type="submit" class="btn-danger">삭제</button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        </table>
+                        </div>
+                    </div>
+
+                    <div class="edit-panel">
+                        <h3>카테고리 추가</h3>
+                        <form method="POST" class="edit-form">
+                            <input type="hidden" name="form_type" value="add_category">
+                            <div class="form-group">
+                                <label>카테고리 이름</label>
+                                <input type="text" name="category_name" required>
+                            </div>
+                            <button type="submit" class="btn-primary">카테고리 추가</button>
+                        </form>
+
+                        <hr>
+                        <h3>카테고리 목록</h3>
+                        <p class="description">분류된 책이 없는 카테고리만 삭제 가능합니다.</p>
+                        <table class="user-table">
+                            <thead>
+                                <tr><th>이름</th><th>책 종류의 수</th><th>삭제</th></tr>
+                            </thead>
+                            <tbody>
+                                {% for category in categories %}
+                                <tr>
+                                    <td>{{ category.category_name }}</td>
+                                    <td>{{ category.book_count }}</td>
+                                    <td>
+                                        <form method="POST" onsubmit="return confirm('정말로 이 카테고리를 삭제하시겠습니까?');">
+                                            <input type="hidden" name="form_type" value="delete_category">
+                                            <input type="hidden" name="category_id" value="{{ category.category_id }}">
+                                            <button type="submit" class="btn-danger" {{ 'disabled' if category.book_count > 0 }}>삭제</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

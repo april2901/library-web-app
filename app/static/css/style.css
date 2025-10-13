@@ -38,7 +38,7 @@ body {
 /* 로고 링크 스타일 */
 .logo a {
     text-decoration: none;
-    color: black;
+    color: rgb(36, 16, 223);
     font-weight: bold;
     font-size: 1.5em;
 }
@@ -93,8 +93,81 @@ body {
 }
 
 .ranking-sidebar {
-    flex: 1; /* flex-grow: 1, 남는 공간을 1의 비율로 차지 */
-    min-height: 400px;
+    background-color: #f8f9fa; /* 부드러운 배경색 추가 */
+    border: 1px solid #e9ecef;
+    border-radius: 8px; /* 모서리를 둥글게 */
+    padding: 20px;
+    height: 100%; /* 부모 높이에 맞춤 */
+}
+.ranking-sidebar h3 {
+    text-align: center;
+    font-size: 1.2em;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #343a40;
+}
+
+/* 순위 리스트 전체 */
+.ranking-list {
+    list-style: none; /* 기본 숫자 제거 */
+    padding-left: 0;
+    margin: 0;
+    counter-reset: rank-counter; /* 순위 번호를 매기기 위한 카운터 초기화 */
+}
+
+/* 순위 리스트 각 항목 */
+.ranking-list li {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+.ranking-list li:last-child {
+    border-bottom: none; /* 마지막 항목의 밑줄은 제거 */
+}
+
+/* ✨ 여기가 핵심! ✨ 가상 요소를 사용해 순위 번호 스타일링 */
+.ranking-list li::before {
+    counter-increment: rank-counter; /* 카운터 1씩 증가 */
+    content: counter(rank-counter);  /* 카운터 숫자를 내용으로 표시 */
+    font-size: 1.1em;
+    font-weight: bold;
+    min-width: 30px; /* 번호가 들어갈 공간 확보 */
+    text-align: center;
+    margin-right: 15px;
+    color: #868e96;
+}
+
+/* 🥇 1, 2, 3등 특별 스타일 (Podium Effect) */
+.ranking-list li:nth-child(1)::before {
+    content: '🥇';
+    font-size: 1.5em;
+}
+.ranking-list li:nth-child(2)::before {
+    content: '🥈';
+    font-size: 1.5em;
+}
+.ranking-list li:nth-child(3)::before {
+    content: '🥉';
+    font-size: 1.5em;
+}
+
+.rank-name {
+    flex-grow: 1; /* 이름이 남은 공간을 모두 차지하도록 함 */
+    font-weight: 500;
+    color: #495057;
+}
+
+.rank-count {
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #007bff;
+}
+
+/* 데이터가 없을 때 스타일 */
+.no-data {
+    justify-content: center;
+    color: #adb5bd;
 }
 
 .new-books {
@@ -260,4 +333,47 @@ body.login-page {
     text-align: center;
     margin-bottom: 24px;
     color: #333;
+}
+
+/* --- Role Selection Styles --- */
+
+/* 옵션들을 가로로 배치하기 위한 컨테이너 */
+.role-options {
+    display: flex;       /* 옵션들을 가로로 나란히 배치 */
+    gap: 10px;           /* 옵션 사이의 간격 */
+    margin-top: 8px;
+}
+
+/* 개별 옵션을 감싸는 컨테이너 */
+.role-option {
+    flex: 1; /* 두 옵션이 동일한 너비를 갖도록 함 */
+}
+
+/* 기본 라디오 버튼 숨기기 */
+.role-option input[type="radio"] {
+    display: none;
+}
+
+/* 라벨을 버튼처럼 보이게 스타일링 */
+.role-option label {
+    display: block;      /* 라벨이 전체 공간을 차지하도록 함 */
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out; /* 부드러운 효과를 위한 transition */
+}
+
+/* ✨ 여기가 핵심! ✨ 선택된 라디오 버튼에 연결된 라벨의 스타일 변경 */
+.role-option input[type="radio"]:checked + label {
+    background-color: #e9f5ff; /* 선택 시 배경색 */
+    border-color: #007bff;   /* 선택 시 테두리색 */
+    color: #007bff;
+    font-weight: bold;
+}
+
+/* 마우스를 올렸을 때의 효과 */
+.role-option label:hover {
+    border-color: #999;
 }

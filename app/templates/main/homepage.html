@@ -9,6 +9,15 @@
 
 <body>
     <div class="container">
+                    {% with messages = get_flashed_messages() %}
+                  {% if messages %}
+                    <ul class="flashes">
+                    {% for message in messages %}
+                      <li>{{ message }}</li>
+                    {% endfor %}
+                    </ul>
+                  {% endif %}
+                {% endwith %}
         <header class="header">
             <div class="logo">
                 <a href="{{ url_for('main.homepage') }}">ITE2038 Library</a>
@@ -22,12 +31,16 @@
                     <span>환영합니다, <strong>{{ session.user_name }}</strong>님!</span>
                     <div class="buttons">
                         <a href="{{ url_for('mypage.mypage') }}" class="btn">마이페이지</a>
+                        {% if session.user_role == 1 %}
+                            <a href="{{ url_for('mypage.adminpage') }}" class="btn">관리자 페이지</a>
+                        {% endif %}
                         <a href="{{ url_for('auth.logout') }}" class="btn">로그아웃</a>
                     </div>
                 {% else %}
                     <span>로그인이 필요합니다</span>
                     <div class="buttons">
                         <a href="{{ url_for('auth.login') }}" class="btn">로그인</a>
+                        <a href="{{ url_for('auth.signup') }}" class="btn">회원가입</a>
                     </div>
                     {% endif %}
             </div>
@@ -36,8 +49,18 @@
         <main class="main-content">
 
 
-            <aside class="ranking-sidebar"> <!-- 랭킹 보여줄 부분-->
-                ranking
+            <aside class="ranking-sidebar">
+                <h3>다독왕 Top 5</h3>
+                <ol class="ranking-list">
+                    {% for user in top_users %}
+                        <li>
+                            <span class="rank-name",p style="white-space: pre;">{{ user.user_name }}     </span>
+                            <span class="rank-count">{{ user.rent_count }}권</span>
+                        </li>
+                    {% else %}
+                        <li class="no-data">대여 기록이 없습니다.</li>
+                    {% endfor %}
+                </ol>
             </aside>
 
 
@@ -62,6 +85,7 @@
                     <button class="slider-btn prev-btn">&lt;</button>
                     <button class="slider-btn next-btn">&gt;</button>
                 </div>
+
             </section>
             <script src="{{ url_for('static', filename='js/slide.js') }}"></script>
         </main>

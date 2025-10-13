@@ -1,0 +1,102 @@
+<html>
+<head>
+    <title>signup Page</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <a href="{{ url_for('main.homepage') }}">ITE2038 Library</a>
+            </div>
+            <nav class="navigation">
+                <a href="#">menu1</a>
+                <a href="#">menu2</a>
+            </nav>
+            <div class="personal-info">
+                {% if session.get('user_id') %}
+                    <span>아이디: {{ session['user_name'] }}</span>
+                    <div class="buttons">
+                        <a href="{{ url_for('mypage.mypage') }}" class="btn">마이페이지</a>
+                        <a href="{{ url_for('auth.logout') }}" class="btn">로그아웃</a>
+                    </div>
+                {% else %}
+                    <span>로그인이 필요합니다</span>
+                    <div class="buttons">
+                        <a href="{{ url_for('auth.login') }}" class="btn">로그인</a>
+                        <a href="{{ url_for('auth.signup') }}" class="btn">회원가입</a>
+                    </div>
+                {% endif %}
+            </div>
+        </header>
+        <main class="main-content">
+            <section class="login-section">
+                <h2>회원가입</h2>
+                <form method="POST" action="{{ url_for('auth.signup') }}">
+                    <div class ="form-group">
+                        <label for="user_name">아이디</label>
+                        <input type="text" id="user_name" name="user_name" required>
+                    </div>
+                    <div class ="form-group">
+                        <label for="user_pw">패스워드</label>
+                        <input type="password" id="user_pw" name="user_pw" required>
+                    </div>
+                    <div class ="form-group">
+                        <label for="user_email">패스워드 확인</label>
+                        <input type="password" id="user_pw_confirm" name="user_pw_confirm" required>
+                    </div>
+                    <!--유저가 일반 사용자인지 관리자인지 선택-->
+                    <div class="form-group">
+                        <label>계정 유형</label>
+                        <div class="role-options">
+                            <div class="role-option">
+                                <input type="radio" id="role_user" name="role" value="0" checked>
+                                <label for="role_user">일반 사용자</label>
+                            </div>
+                            <div class="role-option">
+                                <input type="radio" id="role_admin" name="role" value="1">
+                                <label for="role_admin">관리자</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group" id="admin-code-group" style="display: none;">
+                        <label for="admin_code">추가 코드</label>
+                        <input type="password" id="admin_code" name="admin_code">
+                    </div>
+                    <button type="submit" class="btn">회원가입</button>
+                </form>
+                {% with messages = get_flashed_messages() %}
+                  {% if messages %}
+                    <ul class="flashes">
+                    {% for message in messages %}
+                      <li>{{ message }}</li>
+                    {% endfor %}
+                    </ul>
+                  {% endif %}
+                {% endwith %}
+            </section>
+        </main>
+    </div>
+    <script>
+        //관리자 선택시 추가 코드 입력란 보이기
+        const roleRadios = document.querySelectorAll('input[name="role"]');
+        
+        const adminCodeGroup = document.getElementById('admin-code-group');
+        
+        const adminCodeInput = document.getElementById('admin_code');
+
+        roleRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === '1') {
+                    adminCodeGroup.style.display = 'block'; 
+                    adminCodeInput.required = true;        
+                } else { 
+                    adminCodeGroup.style.display = 'none'; 
+                    adminCodeInput.required = false;      
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>관리자 페이지</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+
+
+<body>
+    <div class="container">
+                    {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul class="flashes">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+            {% endif %}
+        {% endwith %}
+        <header class="header">
+            <div class="logo">
+                <a href="{{ url_for('main.homepage') }}">ITE2038 Library</a>
+            </div>
+            <nav class="navigation">
+                <a href="{{ url_for('mypage.dbeditpage') }}">책/카테고리 수정</a>
+            </nav>
+            <div class="personal-info"> <!-- 개인정보 창 -->
+                    <span>환영합니다, <strong>{{ session.user_name }}</strong>님!</span>
+                    <div class="buttons">
+                        <a href="{{ url_for('mypage.mypage') }}" class="btn">마이페이지</a>
+                        <a href="{{ url_for('mypage.adminpage') }}" class="btn">관리자 페이지</a>
+                        <a href="{{ url_for('auth.logout') }}" class="btn">로그아웃</a>
+                    </div>
+            </div>
+        </header>
+        <main class="main-content">
+            <section class="admin-section">
+                <div class="tables-row">
+                    <div>
+                    <h2>전체 사용자</h2>
+                    <p class="description">여기는 관리자 전용 페이지입니다. 관리자 권한이 있는 사용자만 접근할 수 있습니다.</p>
+
+                    <h3>유저 관리</h3>
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th>아이디</th>
+                                <th>이름</th>
+                                <th>역할</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user.user_id }}</td>
+                                <td>{{ user.user_name }}</td>
+                                <td>
+                                    {% if user.user_role|int == 1 %}
+                                        <span class="role-badge role-admin">관리자</span>
+                                    {% else %}
+                                        <span class="role-badge role-user">일반 사용자</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                    <div>
+                    <h2>유령회원</h2>
+                    <p class="description">대출 내역이 한번도 없는 유저의 리스트입니다.</p>
+                    <h3>유령회원 목록</h3>
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th>아이디</th>
+                                <th>이름</th>
+                                <th>역할</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in ghost_users %}
+                            <tr>
+                                <td>{{ user.user_id }}</td>
+                                <td>{{ user.user_name }}</td>
+                                <td>
+                                    {% if user.user_role|int == 1 %}
+                                        <span class="role-badge role-admin">관리자</span>
+                                    {% else %}
+                                        <span class="role-badge role-user">일반 사용자</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div></div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

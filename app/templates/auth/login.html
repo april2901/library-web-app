@@ -1,3 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}로그인{% endblock %}
+
+{% block content %}
+    <main class="main-content">
+        <section class="login-section">
+            <h2>로그인</h2>
+            <form method="POST" action="{{ url_for('auth.login') }}">
+                </form>
+        </section>
+    </main>
+{% endblock %}
+
 <html>
 <head>
     <title>Login Page</title>
@@ -6,6 +20,15 @@
 </head>
 <body>
     <div class="container">
+                {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul class="flashes">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+            {% endif %}
+        {% endwith %}
         <header class="header">
             <div class="logo">
                 <a href="{{ url_for('main.homepage') }}">ITE2038 Library</a>
@@ -45,15 +68,6 @@
                     <button type="submit" class="btn">로그인</button>
                 </form>
                 
-                {% with messages = get_flashed_messages() %}
-                  {% if messages %}
-                    <ul class="flashes">
-                    {% for message in messages %}
-                      <li>{{ message }}</li>
-                    {% endfor %}
-                    </ul>
-                  {% endif %}
-                {% endwith %}
             </section>
         </main>
     </div>
