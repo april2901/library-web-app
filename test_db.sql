@@ -95,6 +95,9 @@ INSERT INTO book_data(title, author) VALUES('아주 작은 습관의 힘', '제�
 INSERT INTO book_data(title, author) VALUES('아몬드', '손원평');
 INSERT INTO book_data(title, author) VALUES('여행의 이유', '김영하');
 INSERT INTO book_data(title, author) VALUES('죽은 시인의 사회', 'N. H. 클라인바움');
+INSERT INTO book_data(title, author) VALUES('마션', '앤디위어');
+INSERT INTO book_data(title, author) VALUES('프로젝트헤일메리', '앤디위어');
+INSERT INTO book_data(title, author) VALUES('아르테미스', '앤디위어');
 
 -- 실제 서적 데이터 (실물 책 재고)
 -- 모래 언덕 (3권)
@@ -115,7 +118,7 @@ INSERT INTO book_status(book_code, is_rent) VALUES(5, FALSE);
 INSERT INTO book_status(book_code, is_rent) VALUES(6, TRUE);
 -- 사피엔스 (2권)
 INSERT INTO book_status(book_code, is_rent) VALUES(7, TRUE);
-INSERT INTO book_status(book_code, is_rent) VALUES(7, FALSE);
+INSERT INTO book_status(book_code, is_rent) VALUES(7, FALSE); -- 12
 -- 총, 균, 쇠 (1권)
 INSERT INTO book_status(book_code, is_rent) VALUES(8, FALSE);
 -- 클린 코드 (3권)
@@ -137,6 +140,15 @@ INSERT INTO book_status(book_code, is_rent) VALUES(13, FALSE);
 INSERT INTO book_status(book_code, is_rent) VALUES(14, TRUE);
 -- 죽은 시인의 사회 (1권)
 INSERT INTO book_status(book_code, is_rent) VALUES(15, FALSE);
+-- 마션 (2권)
+INSERT INTO book_status(book_code, is_rent) VALUES(16, TRUE);
+INSERT INTO book_status(book_code, is_rent) VALUES(16, TRUE);
+-- 프로젝트헤일메리 (3권)
+INSERT INTO book_status(book_code, is_rent) VALUES(17, FALSE);
+INSERT INTO book_status(book_code, is_rent) VALUES(17, FALSE);
+INSERT INTO book_status(book_code, is_rent) VALUES(17, FALSE);
+-- 아르테미스 (1권)
+INSERT INTO book_status(book_code, is_rent) VALUES(18, FALSE);
 
 -- 서적-카테고리 연결 데이터
 INSERT INTO book_category(book_code, category_id) VALUES(1, 1); -- 모래 언덕: 소설,과학
@@ -157,26 +169,47 @@ INSERT INTO book_category(book_code, category_id) VALUES(12, 4); -- 아주 작�
 INSERT INTO book_category(book_code, category_id) VALUES(13, 1); -- 아몬드: 소설
 INSERT INTO book_category(book_code, category_id) VALUES(14, 6); -- 여행의 이유: 에세이
 INSERT INTO book_category(book_code, category_id) VALUES(15, 1); -- 죽은 시인의 사회: 소설
+INSERT INTO book_category(book_code, category_id) VALUES(16, 1); -- 마션: 소설,과학
+INSERT INTO book_category(book_code, category_id) VALUES(16, 2);
+INSERT INTO book_category(book_code, category_id) VALUES(17, 1); -- 프로젝트헤일메리: 소설,과학
+INSERT INTO book_category(book_code, category_id) VALUES(17, 2);
+INSERT INTO book_category(book_code, category_id) VALUES(18, 1); -- 아르테미스: 소설,과학
+INSERT INTO book_category(book_code, category_id) VALUES(18, 2);
 
 -- 대출 기록 데이터 (현재 대출중인 책 + 과거 기록)
 -- 현재 대출중인 책들 (is_rent가 TRUE인 book_id와 일치)
+INSERT INTO rent(book_id, user_id, rent_date) VALUES(9, 1, '2025-10-01 09:00:00'); -- 이기적유전자
 INSERT INTO rent(book_id, user_id, rent_date) VALUES(1, 3, '2025-10-11 10:00:00'); -- 모래 언덕
-INSERT INTO rent(book_id, user_id, rent_date) VALUES(4, 4, '2025-10-05 14:00:00'); -- 파운데이션 (연체)
-INSERT INTO rent(book_id, user_id, rent_date) VALUES(6, 5, '2025-09-20 11:00:00'); -- 1984 (연체)
-INSERT INTO rent(book_id, user_id, rent_date) VALUES(3, 7, '2025-10-01 09:00:00'); -- 멋진 신세계 (연체)
-INSERT INTO rent(book_id, user_id, rent_date) VALUES(7, 3, '2025-10-10 18:00:00'); -- 이기적 유전자
-INSERT INTO rent(book_id, user_id, rent_date) VALUES(8, 6, '2025-10-13 09:30:00'); -- 코스모스
-INSERT INTO rent(book_id, user_id, rent_date) VALUES(9, 7, '2025-10-07 15:45:00'); -- 사피엔스
-INSERT INTO rent(book_id, user_id, rent_date) VALUES(9, 6, '2025-10-11 09:00:00'); -- 클린 코드
-INSERT INTO rent(book_id, user_id, rent_date) VALUES(12, 7, '2025-10-08 13:00:00'); -- 아주 작은 습관의 힘
-INSERT INTO rent(book_id, user_id, rent_date) VALUES(14, 8, '2025-10-09 16:00:00'); -- 아몬드
-INSERT INTO rent(book_id, user_id, rent_date) VALUES(15, 5, '2025-10-12 10:30:00'); -- 여행의 이유
+INSERT INTO rent(book_id, user_id, rent_date) VALUES(4, 4, '2025-10-05 14:00:00'); -- 파운데이션
+INSERT INTO rent(book_id, user_id, rent_date) VALUES(6, 5, '2025-09-20 11:00:00'); -- 1984
+INSERT INTO rent(book_id, user_id, rent_date) VALUES(7, 3, '2025-10-10 18:00:00'); -- 멋진 신세계
+INSERT INTO rent(book_id, user_id, rent_date) VALUES(8, 6, '2025-10-13 09:30:00'); -- 이기적유전자
+INSERT INTO rent(book_id, user_id, rent_date) VALUES(10, 6, '2025-10-11 09:00:00'); -- 코스모스
+INSERT INTO rent(book_id, user_id, rent_date) VALUES(11, 7, '2025-10-08 13:00:00'); -- 사피엔스
+INSERT INTO rent(book_id, user_id, rent_date) VALUES(14, 8, '2025-10-09 16:00:00'); -- 클린코드
+INSERT INTO rent(book_id, user_id, rent_date) VALUES(20, 5, '2025-10-12 12:00:00'); -- 아주 작은 습관의 힘
+INSERT INTO rent(book_id, user_id, rent_date) VALUES(22, 4, '2025-10-07 15:30:00'); -- 아몬드
+INSERT INTO rent(book_id, user_id, rent_date) VALUES(24, 3, '2025-10-06 11:30:00'); -- 여행의 이유
+INSERT INTO rent(book_id, user_id, rent_date) VALUES(26, 2, '2025-10-02 10:00:00'); -- 마션
+INSERT INTO rent(book_id, user_id, rent_date) VALUES(27, 1, '2025-10-03 14:00:00'); -- 마션
+
 -- 과거 대출 기록 (반납 완료)
 INSERT INTO rent(book_id, user_id, rent_date, return_date) VALUES(2, 3, '2025-09-01 10:00:00', '2025-09-08 11:00:00');
 INSERT INTO rent(book_id, user_id, rent_date, return_date) VALUES(5, 4, '2025-09-02 12:00:00', '2025-09-05 15:00:00');
 INSERT INTO rent(book_id, user_id, rent_date, return_date) VALUES(10, 5, '2025-09-10 17:00:00', '2025-09-15 18:00:00');
 INSERT INTO rent(book_id, user_id, rent_date, return_date) VALUES(1, 3, '2025-08-20 10:00:00', '2025-08-27 10:30:00');
+INSERT INTO rent(book_id, user_id, rent_date, return_date) VALUES(12, 6, '2025-09-15 14:00:00', '2025-09-22 16:00:00');
+INSERT INTO rent(book_id, user_id, rent_date, return_date) VALUES(15, 7, '2025-09-18 09:00:00', '2025-09-25 10:00:00');
+INSERT INTO rent(book_id, user_id, rent_date, return_date) VALUES(18, 8, '2025-09-20 11:00:00', '2025-09-27 12:00:00');
+INSERT INTO rent(book_id, user_id, rent_date, return_date) VALUES(3, 4, '2025-08-05 13:00:00', '2025-08-12 14:00:00');
+INSERT INTO rent(book_id, user_id, rent_date, return_date) VALUES(7, 5, '2025-08-10 15:00:00', '2025-08-17 16:00:00');
+INSERT INTO rent(book_id, user_id, rent_date, return_date) VALUES(13, 6, '2025-09-25 10:00:00', '2025-10-02 11:00:00');
+INSERT INTO rent(book_id, user_id, rent_date, return_date) VALUES(17, 7, '2025-09-28 12:00:00', '2025-10-05 13:00:00');
 
 -- 예약 데이터 (모든 실물 책이 대출중인 책에 대한 예약)
 INSERT INTO reservation(book_code, user_id) VALUES(3, 4); -- 1984 (user 4가 예약)
 INSERT INTO reservation(book_code, user_id) VALUES(3, 7); -- 1984 (user 7도 예약)
+INSERT INTO reservation(book_code, user_id) VALUES(4, 2); -- 멋진 신세계 (user 2가 예약)
+INSERT INTO reservation(book_code, user_id) VALUES(5, 1); -- 이기적 유전자 (user 1이 예약)
+INSERT INTO reservation(book_code, user_id) VALUES(16, 8); -- 마션 (user 8이 예약)
+INSERT INTO reservation(book_code, user_id) VALUES(16, 3); -- 마션 (user 3도 예약)

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>모든 서적 페이지</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+
+<body>
+    <div class="container">
+                    {% with messages = get_flashed_messages() %}
+                  {% if messages %}
+                    <ul class="flashes">
+                    {% for message in messages %}
+                      <li>{{ message }}</li>
+                    {% endfor %}
+                    </ul>
+                  {% endif %}
+                {% endwith %}
+        <header class="header">
+            <div class="logo">
+                <a href="{{ url_for('main.homepage') }}">ITE2038 Library</a>
+            </div>
+            <nav class="navigation">
+                <a href="{{ url_for('main.allbookspage') }}">모든 서적 검색 / 대출</a>
+                <a href="{{ url_for('main.topbookspage') }}">인기 서적</a>
+            </nav>
+            <div class="personal-info"> <!-- 개인정보 창 -->
+                {% if session.user_id %}
+                    <span>환영합니다, <strong>{{ session.user_name }}</strong>님!</span>
+                    <div class="buttons">
+                        <a href="{{ url_for('mypage.mypage') }}" class="btn">마이페이지</a>
+                        {% if session.user_role == 1 %}
+                            <a href="{{ url_for('mypage.adminpage') }}" class="btn">관리자 페이지</a>
+                        {% endif %}
+                        <a href="{{ url_for('auth.logout') }}" class="btn">로그아웃</a>
+                    </div>
+                {% else %}
+                    <span>로그인이 필요합니다</span>
+                    <div class="buttons">
+                        <a href="{{ url_for('auth.login') }}" class="btn">로그인</a>
+                        <a href="{{ url_for('auth.signup') }}" class="btn">회원가입</a>
+                    </div>
+                    {% endif %}
+            </div>
+        </header>
+        <main class="main-content">
+            <section class="admin-section"> <h2>서적 목록</h2>
+                <p class="description">도서관의 전체 서적 목록입니다. 검색하거나 정렬할 수 있습니다.</p>
+
+                <div class="search-sort-form">
+                    <form method="GET" action="{{ url_for('main.allbookspage') }}"> <div class="form-row">
+                            <input type="search" name="search" placeholder="제목, 저자, 카테고리 검색..." value="{{ request.args.get('search', '') }}" class="search-input">
+                            
+                            <select name="sort_by" class="sort-select">
+                                <option value="title" {% if request.args.get('sort_by', 'title') == 'title' %}selected{% endif %}>제목순</option>
+                                <option value="author" {% if request.args.get('sort_by') == 'author' %}selected{% endif %}>저자순</option>
+                                <option value="category" {% if request.args.get('sort_by') == 'category' %}selected{% endif %}>카테고리순</option>
+                            </select>
+                            
+                            <select name="sort_order" class="sort-select">
+                                <option value="asc" {% if request.args.get('sort_order', 'asc') == 'asc' %}selected{% endif %}>오름차순</option>
+                                <option value="desc" {% if request.args.get('sort_order') == 'desc' %}selected{% endif %}>내림차순</option>
+                            </select>
+                            
+                            <button type="submit" class="btn-primary">검색/정렬</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="table-scroll-container"> <table class="user-table">
+                    <thead>
+                            <tr>
+                                <th>제목</th>
+                                <th>저자</th>
+                                <th>카테고리</th>
+                                <th>총 수량</th>
+                                <th>대여 가능</th>
+                                <th>대출</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for book in books %}
+                            <tr>
+                                <td>{{ book.title }}</td>
+                                <td>{{ book.author }}</td>
+                                <td>{{ book.categories or '미분류' }}</td>
+                                <td>{{ book.total_quantity }}</td>
+                                <td>{{ book.available_quantity }}</td>
+                                <td>
+                                    {# 로그인 상태일 때만 버튼 표시 #}
+                                    {% if session.user_id %}
+                                        {# 필요한 상태 변수 설정 #}
+                                        {% set is_overdue = user_status and user_status.is_overdue %}
+                                        {% set is_available = book.available_quantity > 0 %}
+                                        {% set already_borrowed = user_status and book.book_code in user_status.borrowed_book_codes %}
+                                        {% set max_loans_reached = user_status and user_status.current_loan_count >= 3 %}
+                                        {% set already_reserved = book.book_code in user_reservations %}
+
+                                        {# 1. 연체 중인 경우: 모든 버튼 비활성화 #}
+                                        {% if is_overdue %}
+                                            <span title="연체 중입니다. 반납 후 이용해주세요.">
+                                                <button type="button" class="btn-disabled btn-overdue" disabled>이용 불가</button>
+                                            </span>
+                                            
+                                        {# 2. 대여 가능한 재고가 있는 경우 #}
+                                        {% elif is_available %}
+                                            {# 이미 동일 종류 대출 중인 경우 #}
+                                            {% if already_borrowed %}
+                                                <span title="이미 동일 종류의 책을 대출 중입니다.">
+                                                    <button type="button" class="btn-disabled btn-already-borrowed" disabled>대출 중</button>
+                                                </span>
+                                            {# 최대 대여 권수 도달한 경우 #}
+                                            {% elif max_loans_reached %}
+                                                <span title="최대 3권까지 대출 가능합니다.">
+                                                    <button type="button" class="btn-disabled btn-max-loans" disabled>대출 불가</button>
+                                                </span>
+                                            {# 대출 가능! #}
+                                            {% else %}
+                                                <form method="POST" action="{{ url_for('main.borrow', book_code=book.book_code) }}" class="borrow-form">
+                                                    <button type="submit" class="btn-primary btn-borrow">대출</button>
+                                                </form>
+                                            {% endif %}
+
+                                        {# 3. 대여 가능한 재고가 없는 경우 (예약 가능성 확인) #}
+                                        {% else %}
+                                            {# 이미 예약한 경우 #}
+                                            {% if already_reserved %}
+                                                <span title="이미 예약하신 도서입니다.">
+                                                    <button type="button" class="btn-disabled btn-already-reserved" disabled>예약됨</button>
+                                                </span>
+                                            {# 예약 가능! #}
+                                            {% else %}
+                                                <form method="POST" action="{{ url_for('main.reserve', book_code=book.book_code) }}" class="reserve-form">
+                                                    <button type="submit" class="btn-secondary btn-reserve">예약</button>
+                                                </form>
+                                            {% endif %}
+                                        {% endif %}
+                                            
+                                    {# 로그아웃 상태일 때 #}
+                                    {% else %}
+                                        <a href="{{ url_for('auth.login') }}" class="btn">로그인 필요</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" style="text-align: center;">표시할 책이 없습니다.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div> </section>
+        </main>
+
+
+    </div>
+</body>
+</html>

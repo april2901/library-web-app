@@ -1,6 +1,6 @@
 <html>
 <head>
-    <title>signup Page</title>
+    <title>회원가입 페이지</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
@@ -11,14 +11,17 @@
                 <a href="{{ url_for('main.homepage') }}">ITE2038 Library</a>
             </div>
             <nav class="navigation">
-                <a href="#">menu1</a>
-                <a href="#">menu2</a>
+                <a href="{{ url_for('main.allbookspage') }}">모든 서적 검색 / 대출</a>
+                <a href="{{ url_for('main.topbookspage') }}">인기 서적</a>
             </nav>
             <div class="personal-info">
                 {% if session.get('user_id') %}
                     <span>아이디: {{ session['user_name'] }}</span>
                     <div class="buttons">
                         <a href="{{ url_for('mypage.mypage') }}" class="btn">마이페이지</a>
+                        {% if session.user_role == 1 %}
+                            <a href="{{ url_for('mypage.adminpage') }}" class="btn">관리자 페이지</a>
+                        {% endif %}
                         <a href="{{ url_for('auth.logout') }}" class="btn">로그아웃</a>
                     </div>
                 {% else %}
@@ -52,7 +55,7 @@
                         <div class="role-options">
                             <div class="role-option">
                                 <input type="radio" id="role_user" name="role" value="0" checked>
-                                <label for="role_user">일반 사용자</label>
+                                <label for="role_user">일반 사용자</tlabel>
                             </div>
                             <div class="role-option">
                                 <input type="radio" id="role_admin" name="role" value="1">

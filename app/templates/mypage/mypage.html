@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>마이 페이지</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <a href="{{ url_for('main.homepage') }}">ITE2038 Library</a>
+            </div>
+            <nav class="navigation">
+                <a href="{{ url_for('main.allbookspage') }}">모든 서적 검색 / 대출</a>
+                <a href="{{ url_for('main.topbookspage') }}">인기 서적</a>
+            </nav>
+            <div class="personal-info"> <!-- 개인정보 창 -->
+                    <span>환영합니다, <strong>{{ session.user_name }}</strong>님!</span>
+                    <div class="buttons">
+                        <a href="{{ url_for('mypage.mypage') }}" class="btn">마이페이지</a>
+                        {% if session.user_role == 1 %}
+                            <a href="{{ url_for('mypage.adminpage') }}" class="btn">관리자 페이지</a>
+                        {% endif %}
+                        <a href="{{ url_for('auth.logout') }}" class="btn">로그아웃</a>
+                    </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <section class="admin-section">
+                <h2>마이 페이지</h2>
+                <p class="description">환영합니다, <strong>{{ session.user_name }}</strong>님! 회원님의 도서 이용 내역입니다.</p>
+                
+                <div class="mypage-panel">
+                    <h3>현재 예약한 도서</h3>
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th>제목</th>
+                                <th>작가</th>
+                                <th>예약일</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in reservations %}
+                            <tr>
+                                <td>{{ r.title }}</td>
+                                <td>{{ r.author }}</td>
+                                <td>{{ r.reservation_date.strftime('%Y-%m-%d') }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" style="text-align: center;">예약 내역이 없습니다.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mypage-panel">
+                    <h3>나의 대여 기록</h3>
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th>id</th>
+                                <th>제목</th>
+                                <th>작가</th>
+                                <th>대여일</th>
+                                <th>반납 상태</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in rentals %}
+                            <tr>
+                                <td>{{ r.book_id }}</td>
+                                <td>{{ r.title }}</td>
+                                <td>{{ r.author }}</td>
+                                <td>{{ r.rent_date.strftime('%Y-%m-%d') }}</td>
+                                <td>
+                                    {% if r.return_date %}
+                                        <span class="status-returned">{{ r.return_date.strftime('%Y-%m-%d') }} 반납 완료</span>
+                                    {% else %}
+                                        <form method="POST" class="return-form">
+                                            <input type="hidden" name="rent_id" value="{{ r.rent_id }}">
+                                            <button type="submit" class="btn-primary">반납하기</button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

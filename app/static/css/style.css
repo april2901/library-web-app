@@ -377,3 +377,222 @@ body.login-page {
 .role-option label:hover {
     border-color: #999;
 }
+.main-content {
+    /* 기존 flex 설정이 있다면 유지 */
+    display: flex;
+    justify-content: center; /* 필요하다면 유지, 아니면 제거 */
+    /* admin-section이 부모 너비를 최대한 활용하도록 합니다. */
+}
+
+/* 2. 섹션 너비 조정 (선택사항) */
+.admin-section { /* 또는 다른 .main-content 내부의 섹션 클래스 */
+    width: 90%; /* 화면 너비의 90%를 사용하도록 설정 (값 조절 가능) */
+    max-width: 1400px; /* 너무 넓어지는 것을 방지 (값 조절 가능) */
+    /* 기존 패딩, 배경 등은 유지 */
+    padding: 30px 40px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* 3. 테이블 스크롤 컨테이너 설정 */
+.table-scroll-container {
+    max-height: 60vh; /* 화면 높이의 60%를 최대 높이로 설정 (값 조절 가능) */
+    overflow-y: auto;   /* 내용이 넘칠 경우 세로 스크롤바 자동 생성 */
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    margin-top: 20px; /* 폼과의 간격 */
+}
+
+/* 4. 테이블 너비 100% 및 레이아웃 고정 */
+.user-table {
+    width: 100%; /* 컨테이너 너비에 꽉 차도록 설정 */
+    border-collapse: collapse;
+    table-layout: fixed; /* 컬럼 너비 고정 (내용 길이에 따라 변하지 않음) */
+    word-wrap: break-word; /* 긴 텍스트 줄바꿈 (선택사항) */
+}
+
+/* 5. 스크롤 시 헤더 고정 (이전 답변 내용) */
+.table-scroll-container thead th {
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa;
+    z-index: 1;
+    /* 헤더 텍스트 줄바꿈 방지 */
+    white-space: nowrap; 
+}
+
+/* 6. 컬럼 너비 재조정 (내용에 맞게 비율 조정) */
+.user-table th:nth-child(1), /* 제목 */
+.user-table td:nth-child(1) {
+    width: 30%; /* 제목 너비 늘림 */
+}
+
+.user-table th:nth-child(2), /* 저자 */
+.user-table td:nth-child(2) {
+    width: 15%;
+}
+
+.user-table th:nth-child(3), /* 카테고리 */
+.user-table td:nth-child(3) {
+    width: 25%;
+}
+
+.user-table th:nth-child(4), /* 총 수량 */
+.user-table td:nth-child(4) {
+    width: 10%;
+    text-align: center;
+}
+
+.user-table th:nth-child(5), /* 대여 가능 */
+.user-table td:nth-child(5) {
+    width: 10%; /* 너비 줄임 */
+    text-align: center;
+    font-weight: bold;
+}
+
+/* --- Borrow Button Styles --- */
+.borrow-form {
+    margin: 0;
+}
+.btn-borrow, .btn-disabled {
+    padding: 5px 10px;
+    font-size: 0.9em;
+}
+.btn-disabled { /* 기본 비활성화 버튼 */
+    background-color: #ced4da;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+.btn-overdue { /* 연체 시 비활성화 버튼 */
+    background-color: #ffe3e3; /* 연한 빨강 */
+    color: #c92a2a;
+    cursor: not-allowed;
+}
+
+/* --- Alert Styles --- */
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+.alert-danger { /* 연체 알림 스타일 */
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+.alert-danger a {
+    color: #721c24;
+    font-weight: bold;
+}
+
+
+
+
+.reserve-form {
+    margin: 0;
+}
+.btn-reserve {
+    padding: 5px 10px;
+    font-size: 0.9em;
+    background-color: #6c757d; /* 보조 색상 (회색 계열) */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.btn-reserve:hover {
+    background-color: #5a6268;
+}
+
+/* --- Book Action Button Styles --- */
+
+/* Basic button structure (already defined mostly) */
+.btn-borrow, .btn-reserve, .btn-disabled {
+    padding: 6px 12px;
+    font-size: 0.9em;
+    border: none;
+    border-radius: 4px;
+    text-align: center;
+    white-space: nowrap; /* Prevent text wrapping */
+}
+
+/* 1. 대출 가능 (Primary Action) */
+.btn-borrow {
+    background-color: #007bff; /* Blue */
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.btn-borrow:hover {
+    background-color: #0056b3;
+}
+
+/* 2. 예약 가능 (Secondary Action) */
+.btn-reserve {
+    background-color: #6c757d; /* Gray */
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.btn-reserve:hover {
+    background-color: #5a6268;
+}
+
+/* --- Disabled Button States --- */
+.btn-disabled {
+    cursor: not-allowed;
+    opacity: 0.7; /* Make them look slightly faded */
+}
+
+/* 3. 연체 중 (Error State) */
+.btn-overdue {
+    background-color: #f8d7da; /* Light red */
+    color: #721c24; /* Dark red */
+    border: 1px solid #f5c6cb;
+}
+
+/* 4. 이미 대출 중 (Info State) */
+.btn-already-borrowed {
+    background-color: #e2e3e5; /* Light gray */
+    color: #343a40; /* Dark gray */
+    border: 1px solid #d6d8db;
+}
+
+/* 5. 최대 대여 도달 (Warning State) */
+.btn-max-loans {
+    background-color: #fff3cd; /* Light yellow */
+    color: #856404; /* Dark yellow */
+    border: 1px solid #ffeeba;
+}
+
+/* 6. 이미 예약됨 (Info State - Same as Borrowed) */
+.btn-already-reserved {
+    background-color: #e2e3e5; /* Light gray */
+    color: #343a40; /* Dark gray */
+    border: 1px solid #d6d8db;
+}
+
+/* 7. 재고 없음 (Basic Disabled - for cases where reserve isn't shown) */
+/* This will use the default .btn-disabled style you already have */
+/* Add a specific class if needed: .btn-out-of-stock { ... } */
+
+
+/* 로그인 필요 버튼 (Link styled as button) */
+.personal-info .btn, /* Reuse existing styles if possible */
+.borrow-form + .btn { /* Adjust selector if needed */
+    display: inline-block; /* Make the link behave like a button */
+    padding: 6px 12px;
+    font-size: 0.9em;
+    border-radius: 4px;
+    text-decoration: none;
+    background-color: #ffc107; /* Yellow for login prompt */
+    color: #212529; /* Dark text */
+    text-align: center;
+    border: 1px solid #ffc107;
+}
+.borrow-form + .btn:hover {
+    background-color: #e0a800;
+}

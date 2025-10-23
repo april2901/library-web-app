@@ -1,5 +1,6 @@
 import mysql.connector
 from flask import current_app
+from datetime import datetime, timedelta
 
 def get_db_connection():
     conn = mysql.connector.connect(**current_app.config['DB_CONFIG'])
@@ -211,3 +212,200 @@ def delete_category(category_id):
     print('delete_category 호출:', category_id)
     query = "DELETE FROM category WHERE category_id = %s;"
     execute_query(query, params=(category_id,))
+    
+    
+    
+def get_user_reservations(user_id):
+    print('get_user_reservations 호출:', user_id)
+    query = """
+        SELECT bd.title, bd.author, r.reservation_date, r.book_code
+        FROM reservation AS r
+        JOIN book_data AS bd ON r.book_code = bd.book_code
+        WHERE r.user_id = %s
+        ORDER BY r.reservation_date DESC;
+    """
+    return execute_query(query, params=(user_id,), fetch='all')
+
+def get_user_rentals(user_id):
+    print('get_user_rentals 호출:', user_id)
+    query = """
+        SELECT r.rent_id, bd.title, bd.author, r.rent_date, r.return_date, r.book_id
+        FROM rent AS r
+        JOIN book_status AS bs ON r.book_id = bs.book_id
+        JOIN book_data AS bd ON bs.book_code = bd.book_code
+        WHERE r.user_id = %s
+        ORDER BY r.rent_date DESC;
+    """
+    return execute_query(query, params=(user_id,), fetch='all')
+
+def return_book(rent_id):
+    print('return_book 호출:', rent_id)
+    # 1. rent 테이블에 반납 날짜를 기록합니다.
+    update_rent_query = "UPDATE rent SET return_date = NOW() WHERE rent_id = %s;"
+    execute_query(update_rent_query, params=(rent_id,))
+
+    # 2. book_status 테이블의 is_rent 상태를 FALSE로 변경합니다.
+    update_status_query = """
+        UPDATE book_status 
+        SET is_rent = FALSE 
+        WHERE book_id = (SELECT book_id FROM rent WHERE rent_id = %s);
+    """
+    execute_query(update_status_query, params=(rent_id,))
+    
+
+
+def get_all_books(search_query=None, sort_by='title', sort_order='asc'):
+    # 기본
+    base_query = """
+        SELECT
+            bd.book_code, bd.title, bd.author,
+            GROUP_CONCAT(DISTINCT c.category_name ORDER BY c.category_name SEPARATOR ', ') AS categories,
+            COUNT(DISTINCT bs.book_id) AS total_quantity,
+            COALESCE(avail_counts.available_count, 0) AS available_quantity 
+        FROM book_data AS bd
+        LEFT JOIN book_status AS bs ON bd.book_code = bs.book_code 
+        LEFT JOIN book_category AS bc ON bd.book_code = bc.book_code
+        LEFT JOIN category AS c ON bc.category_id = c.category_id
+        LEFT JOIN (
+            SELECT book_code, COUNT(book_id) AS available_count
+            FROM book_status
+            WHERE is_rent = FALSE
+            GROUP BY book_code
+        ) AS avail_counts ON bd.book_code = avail_counts.book_code
+    """
+    
+    params = []
+    where_sql = ""
+
+    # 검색
+    if search_query:
+        search_pattern = f"%{search_query}%"
+        where_sql = " WHERE (bd.title LIKE %s OR bd.author LIKE %s OR c.category_name LIKE %s)"
+        params.extend([search_pattern, search_pattern, search_pattern])
+
+    # 최종
+    final_query = base_query + where_sql
+    final_query += " GROUP BY bd.book_code"
+
+    # 정렬
+    allowed_sort_columns = {'title': 'bd.title', 'author': 'bd.author', 'category': 'categories'}
+    sort_column = allowed_sort_columns.get(sort_by, 'bd.title')
+    order = 'DESC' if sort_order.lower() == 'desc' else 'ASC'
+    final_query += f" ORDER BY {sort_column} {order}"
+
+    return execute_query(final_query, params=tuple(params), fetch='all')
+
+
+
+def get_popular_books_last_3_months(limit=10):
+    """최근 3개월간 가장 많이 대출된 책 (종류별) 순위를 반환합니다."""
+    # 3개월 전 날짜 계산
+    three_months_ago = datetime.now() - timedelta(days=90)
+    
+    query = """
+        SELECT bd.title, bd.author, COUNT(r.rent_id) AS rental_count
+        FROM rent AS r
+        JOIN book_status AS bs ON r.book_id = bs.book_id
+        JOIN book_data AS bd ON bs.book_code = bd.book_code
+        WHERE r.rent_date >= %s 
+        GROUP BY bd.book_code
+        ORDER BY rental_count DESC
+        LIMIT %s;
+    """
+    # LIMIT 값도 파라미터로 안전하게 전달
+    return execute_query(query, params=(three_months_ago, limit), fetch='all')
+
+def get_popular_categories_last_3_months(limit=5):
+    """최근 3개월간 가장 많이 대출된 카테고리 순위를 반환합니다."""
+    three_months_ago = datetime.now() - timedelta(days=90)
+    
+    query = """
+        SELECT c.category_name, COUNT(r.rent_id) AS rental_count
+        FROM rent AS r
+        JOIN book_status AS bs ON r.book_id = bs.book_id
+        JOIN book_category AS bc ON bs.book_code = bc.book_code
+        JOIN category AS c ON bc.category_id = c.category_id
+        WHERE r.rent_date >= %s
+        GROUP BY c.category_id
+        ORDER BY rental_count DESC
+        LIMIT %s;
+    """
+    return execute_query(query, params=(three_months_ago, limit), fetch='all')
+
+def get_user_borrowing_status(user_id):
+    """특정 사용자의 현재 대출 상태 (대출 권수, 연체 여부, 대출 중인 책 종류)를 확인합니다."""
+    # 현재 대출 중인 (return_date가 NULL인) 기록 조회
+    query = """
+        SELECT r.rent_date, bs.book_code
+        FROM rent AS r
+        JOIN book_status AS bs ON r.book_id = bs.book_id
+        WHERE r.user_id = %s AND r.return_date IS NULL;
+    """
+    current_rentals = execute_query(query, params=(user_id,), fetch='all')
+
+    current_loan_count = len(current_rentals)
+    is_overdue = False
+    borrowed_book_codes = set() # 중복 방지를 위해 set 사용
+
+    seven_days_ago = datetime.now() - timedelta(days=7)
+    for rental in current_rentals:
+        borrowed_book_codes.add(rental['book_code'])
+        # rent_date가 7일보다 오래되었으면 연체
+        if rental['rent_date'] < seven_days_ago:
+            is_overdue = True
+            # 연체가 하나라도 있으면 더 이상 확인할 필요 없음
+            break 
+
+    return {
+        'current_loan_count': current_loan_count,
+        'is_overdue': is_overdue,
+        'borrowed_book_codes': list(borrowed_book_codes) # 다시 리스트로 변환하여 반환
+    }
+
+def find_available_copy(book_code):
+    """특정 책 종류(book_code) 중 대출 가능한 실물 책(book_id) 하나를 찾습니다."""
+    query = """
+        SELECT book_id FROM book_status
+        WHERE book_code = %s AND is_rent = FALSE
+        LIMIT 1; 
+    """
+    result = execute_query(query, params=(book_code,), fetch='one')
+    return result['book_id'] if result else None
+
+#책빌리기
+def borrow_book(user_id, book_id):
+    # 대여 기록 추가
+    add_rent_query = "INSERT INTO rent (user_id, book_id, rent_date) VALUES (%s, %s, NOW());"
+    execute_query(add_rent_query, params=(user_id, book_id))
+
+    # 책 상태 대여중
+    update_status_query = "UPDATE book_status SET is_rent = TRUE WHERE book_id = %s;"
+    execute_query(update_status_query, params=(book_id,))
+
+    
+#이미 예약했는지?
+def check_existing_reservation(user_id, book_code):
+    query = "SELECT reservation_id FROM reservation WHERE user_id = %s AND book_code = %s;"
+    result = execute_query(query, params=(user_id, book_code), fetch='one')
+    return result is not None 
+
+#예약하기
+def add_reservation(user_id, book_code):
+    query = "INSERT INTO reservation (user_id, book_code, reservation_date) VALUES (%s, %s, NOW());"
+    execute_query(query, params=(user_id, book_code))
+    
+def delete_reservation(user_id, book_code):
+    """특정 사용자의 특정 도서 예약을 삭제합니다."""
+    query = "DELETE FROM reservation WHERE user_id = %s AND book_code = %s;"
+    execute_query(query, params=(user_id, book_code))
+
+def get_oldest_reservation_user(book_code):
+    """특정 도서를 가장 먼저 예약한 사용자의 ID를 반환합니다."""
+    query = """
+        SELECT user_id FROM reservation 
+        WHERE book_code = %s 
+        ORDER BY reservation_date ASC 
+        LIMIT 1;
+    """
+    result = execute_query(query, params=(book_code,), fetch='one')
+    return result['user_id'] if result else None

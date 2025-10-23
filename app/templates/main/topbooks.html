@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>인기 서적 차트</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <style>
+        /* 이 페이지 전용 스타일 */
+        .chart-container {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        .chart-panel {
+            flex: 1;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .chart-panel h3 {
+            margin-top: 0;
+            text-align: center;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .chart-list {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+        .chart-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 5px;
+            border-bottom: 1px dashed #e0e0e0;
+        }
+        .chart-list li:last-child {
+            border-bottom: none;
+        }
+        .chart-list .rank-item { /* 책 제목 또는 카테고리 이름 */
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+        .chart-list .rank-count { /* 대여 횟수 */
+            font-weight: bold;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <a href="{{ url_for('main.homepage') }}">ITE2038 Library</a>
+            </div>
+            <nav class="navigation">
+                <a href="{{ url_for('main.allbookspage') }}">모든 서적 검색 / 대출</a>
+                <a href="{{ url_for('main.topbookspage') }}">인기 서적</a>
+            </nav>
+            <div class="personal-info"> <!-- 개인정보 창 -->
+                {% if session.user_id %}
+                    <span>환영합니다, <strong>{{ session.user_name }}</strong>님!</span>
+                    <div class="buttons">
+                        <a href="{{ url_for('mypage.mypage') }}" class="btn">마이페이지</a>
+                        {% if session.user_role == 1 %}
+                            <a href="{{ url_for('mypage.adminpage') }}" class="btn">관리자 페이지</a>
+                        {% endif %}
+                        <a href="{{ url_for('auth.logout') }}" class="btn">로그아웃</a>
+                    </div>
+                {% else %}
+                    <span>로그인이 필요합니다</span>
+                    <div class="buttons">
+                        <a href="{{ url_for('auth.login') }}" class="btn">로그인</a>
+                        <a href="{{ url_for('auth.signup') }}" class="btn">회원가입</a>
+                    </div>
+                    {% endif %}
+            </div>
+        </header>
+
+        <main class="main-content">
+            <section class="admin-section">
+                <h2>인기 서적 차트 (최근 3개월)</h2>
+                <p class="description">최근 3개월간 가장 많이 대출된 도서 및 카테고리 순위입니다.</p>
+
+                <div class="chart-container">
+                    <div class="chart-panel">
+                        <h3>도서별 Top 10</h3>
+                        <ol class="chart-list">
+                            {% for book in top_books %}
+                            <li>
+                                <span class="rank-item">{{ book.title }} <small>({{ book.author }})</small></span>
+                                <span class="rank-count">{{ book.rental_count }}회</span>
+                            </li>
+                            {% else %}
+                            <li>대출 기록이 없습니다.</li>
+                            {% endfor %}
+                        </ol>
+                    </div>
+
+                    <div class="chart-panel">
+                        <h3>카테고리별 Top 5</h3>
+                        <ol class="chart-list">
+                            {% for category in top_categories %}
+                            <li>
+                                <span class="rank-item">{{ category.category_name }}</span>
+                                <span class="rank-count">{{ category.rental_count }}회</span>
+                            </li>
+                            {% else %}
+                            <li>대출 기록이 없습니다.</li>
+                            {% endfor %}
+                        </ol>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

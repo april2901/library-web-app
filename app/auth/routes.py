@@ -71,7 +71,5 @@ def signup():
             flash("회원가입에 성공했습니다. 로그인해주세요.")
             return redirect(url_for('auth.login'))
 
-        
-        
 
     return render_template('auth/signup.html')

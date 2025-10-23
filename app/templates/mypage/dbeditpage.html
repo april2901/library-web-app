@@ -8,22 +8,14 @@
 </head>
 <body>
     <div class="container">
-            {% with messages = get_flashed_messages() %}
-            {% if messages %}
-            <ul class="flashes">
-            {% for message in messages %}
-                <li>{{ message }}</li>
-            {% endfor %}
-            </ul>
-            {% endif %}
-        {% endwith %}
+            
         <header class="header">
             <div class="logo">
                 <a href="{{ url_for('main.homepage') }}">ITE2038 Library</a>
             </div>
             <nav class="navigation">
-                <a href="#">menu1</a>
-                <a href="#">menu2</a>
+                <a href="{{ url_for('main.allbookspage') }}">모든 서적 검색 / 대출</a>
+                <a href="{{ url_for('main.topbookspage') }}">인기 서적</a>
             </nav>
             <div class="personal-info"> <!-- 개인정보 창 -->
                     <span>환영합니다, <strong>{{ session.user_name }}</strong>님!</span>
@@ -40,6 +32,15 @@
             <section class="admin-section">
                 <h2>DB 관리</h2>
                 <p class="description">책과 카테고리를 추가, 삭제, 관리합니다.</p>
+                {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul class="flashes">
+            {% for message in messages %}
+                <li style="color: red">{{ message }}</li>
+            {% endfor %}
+            </ul>
+            {% endif %}
+        {% endwith %}
                 
                 <div class="db-edit-container">
                     <div class="edit-panel-edit">

@@ -1,13 +1,31 @@
 from flask import Blueprint, render_template
 from app import db
-from flask import request, redirect, url_for, flash
+from flask import request, redirect, url_for, flash, session
 
 mypage_bp = Blueprint('mypage', __name__, url_prefix='/mypage')
 
-@mypage_bp.route('/user')
+@mypage_bp.route('/', methods=['GET', 'POST'])
 def mypage():
+    # 로그인하지 않은 사용자는 접근할 수 없도록 합니다.
+    if 'user_id' not in session:
+        flash("로그인이 필요한 서비스입니다.")
+        return redirect(url_for('auth.login'))
 
-    return render_template('mypage/mypage.html')
+    user_id = session['user_id']
+
+    # '반납하기' 버튼을 눌렀을 때 (POST 요청)
+    if request.method == 'POST':
+        rent_id_to_return = request.form.get('rent_id')
+        if rent_id_to_return:
+            db.return_book(rent_id_to_return)
+            flash("책이 성공적으로 반납되었습니다.")
+        return redirect(url_for('mypage.mypage'))
+
+    # 페이지를 처음 로드할 때 (GET 요청)
+    reservations = db.get_user_reservations(user_id)
+    rentals = db.get_user_rentals(user_id)
+
+    return render_template('mypage/mypage.html', reservations=reservations, rentals=rentals)
 
 @mypage_bp.route('/admin')
 def adminpage():
@@ -39,6 +57,7 @@ def dbeditpage():
         elif form_type == 'add_category':
             if db.is_category_exists(request.form.get('category_name')):
                 flash("이미 존재하는 카테고리입니다.")
+                
                 return redirect(url_for('mypage.dbeditpage'))
             
             category_name = request.form.get('category_name')

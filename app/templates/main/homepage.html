@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>도서관 홈페이지</title>
+    <title>홈페이지</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
@@ -23,12 +23,13 @@
                 <a href="{{ url_for('main.homepage') }}">ITE2038 Library</a>
             </div>
             <nav class="navigation">
-                <a href="#">menu1</a>
-                <a href="#">menu2</a>
+                <a href="{{ url_for('main.allbookspage') }}">모든 서적 검색 / 대출</a>
+                <a href="{{ url_for('main.topbookspage') }}">인기 서적</a>
             </nav>
             <div class="personal-info"> <!-- 개인정보 창 -->
                 {% if session.user_id %}
                     <span>환영합니다, <strong>{{ session.user_name }}</strong>님!</span>
+                    
                     <div class="buttons">
                         <a href="{{ url_for('mypage.mypage') }}" class="btn">마이페이지</a>
                         {% if session.user_role == 1 %}

@@ -95,7 +95,7 @@ table, th, td {
     padding: 8px;
 }
 
-/* ... (기존 admin.css 코드) ... */
+
 
 /* DB 관리 페이지 전용 레이아웃 */
 .db-edit-container {
@@ -104,16 +104,24 @@ table, th, td {
 }
 
 .edit-panel {
-    flex: 1; /* 두 패널이 동일한 너비를 갖도록 함 */
+    flex: 1; 
     background-color: #f8f9fa;
     padding: 20px;
     border-radius: 5px;
+    
+    /* ▼▼▼ 이 두 줄을 추가합니다 ▼▼▼ */
+    min-width: 0;        
+    overflow-x: auto;    
 }
-.edit-panel-eidt {
+.edit-panel-edit {
     flex: 2; 
     background-color: #f8f9fa;
     padding: 20px;
     border-radius: 5px;
+
+    /* ▼▼▼ 이 두 줄을 추가합니다 ▼▼▼ */
+    min-width: 0;        /* 내용물 크기보다 작아질 수 있도록 허용 */
+    overflow-x: auto;    /* 내용이 가로로 넘칠 경우 스크롤바 생성 */
 }
 
 .edit-panel h3 {
@@ -186,4 +194,44 @@ hr {
     /* 다른 내용에 가려지지 않도록 배경색과 z-index를 지정 */
     background-color: #f8f9fa; 
     z-index: 1;
+}
+
+/* --- DB Edit Page - Book List Table Column Widths --- */
+
+/* 테이블 레이아웃 고정 (컬럼 너비가 내용에 따라 변하지 않도록) */
+.edit-panel-edit .user-table { /* 왼쪽 패널의 테이블에만 적용 */
+    table-layout: fixed;
+    width: 100%; /* 부모 너비에 맞춤 */
+}
+
+/* 1번째 열 (책 ID) 너비 설정 */
+.edit-panel-edit .user-table th:nth-child(1),
+.edit-panel-edit .user-table td:nth-child(1) {
+    width: 60px; /* 원하는 너비로 조절 (예: 60픽셀) */
+    text-align: center; /* ID는 가운데 정렬 */
+}
+
+/* 2번째 열 (제목) 너비 설정 (나머지 공간 활용) */
+.edit-panel-edit .user-table th:nth-child(2),
+.edit-panel-edit .user-table td:nth-child(2) {
+    width: auto; /* 자동으로 남은 공간 차지 */
+}
+
+/* 3번째 열 (작가) 너비 설정 */
+.edit-panel-edit .user-table th:nth-child(3),
+.edit-panel-edit .user-table td:nth-child(3) {
+    width: 120px; /* 적절한 너비 지정 */
+}
+
+/* 4번째 열 (카테고리) 너비 설정 */
+.edit-panel-edit .user-table th:nth-child(4),
+.edit-panel-edit .user-table td:nth-child(4) {
+    width: 150px; /* 적절한 너비 지정 */
+}
+
+/* 5번째 열 (삭제 버튼) 너비 설정 */
+.edit-panel-edit .user-table th:nth-child(5),
+.edit-panel-edit .user-table td:nth-child(5) {
+    width: 80px; /* 버튼 크기에 맞게 조절 */
+    text-align: center;
 }
