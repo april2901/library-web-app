@@ -9,7 +9,7 @@ app = create_app()
 
 # 2. @app.cli.command 데코레이터를 사용하여 새로운 명령어를 정의합니다.
 @app.cli.command("db-init")
-@click.argument("filename", default="test.sql") # 기본 파일 이름을 'test.sql'로 수정
+@click.argument("filename", default="test_db.sql") # 기본 파일 이름을 'test.sql'로 수정
 def db_init_command(filename):
     """지정된 SQL 파일을 실행하여 데이터베이스를 초기화합니다."""
     
