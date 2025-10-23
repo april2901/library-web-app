@@ -1,6 +1,5 @@
-drop database if exists library_db;
-create database library_db;
-use library_db;
+
+USE april2901hanyang$default;
 
 create table users(
     user_id int auto_increment primary key ,
