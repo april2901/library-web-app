@@ -1,19 +1,19 @@
-# run.py
+
 from app import create_app
 import os
 import mysql.connector
-import click # Flask CLI 기능을 위해 import
+import click # Flask CLI 
 
-# 1. create_app()을 호출하여 Flask 앱 객체를 만듭니다.
+
 app = create_app()
 
-# 2. @app.cli.command 데코레이터를 사용하여 새로운 명령어를 정의합니다.
+# 새명령어. 나중에 터미널에서 쓸때 
 @app.cli.command("db-init")
-@click.argument("filename", default="test_db.sql") # 기본 파일 이름을 'test.sql'로 수정
+@click.argument("filename", default="test_db.sql") 
 def db_init_command(filename):
     """지정된 SQL 파일을 실행하여 데이터베이스를 초기화합니다."""
     
-    # .env 파일에서 DB 접속 정보 가져오기 (database 이름은 제외)
+    # .env 파일에서 값 가져오기
     db_config = {
         'host': os.environ.get('DB_HOST'),
         'user': os.environ.get('DB_USER'),
@@ -44,7 +44,7 @@ def db_init_command(filename):
         click.echo(f"오류: '{filename}' 파일을 찾을 수 없습니다.")
     except mysql.connector.Error as err:
         click.echo(f"데이터베이스 초기화 실패: {err}")
-        # 오류 발생 시 롤백 (선택사항이지만 권장)
+        
         if conn:
             conn.rollback() 
     finally:
@@ -53,6 +53,5 @@ def db_init_command(filename):
         if conn:
             conn.close()
 
-# 3. 개발 서버 실행 (기존 코드)
 if __name__ == '__main__':
     app.run(debug=True)

@@ -125,6 +125,11 @@
 
                                         {# 재고 없으면 #}
                                         {% else %}
+                                            {# 같은거 대출중#}
+                                            {% if already_borrowed %}
+                                                <span title="이미 동일 종류의 책을 대출 중입니다.">
+                                                    <button type="button" class="btn-disabled btn-already-borrowed" disabled>대출 중</button>
+                                                </span>
                                             {# 이미 예약한 경우 #}
                                             {% if already_reserved %}
                                                 <span title="이미 예약하신 도서입니다.">
