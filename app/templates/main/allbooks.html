@@ -9,15 +9,7 @@
 
 <body>
     <div class="container">
-                    {% with messages = get_flashed_messages() %}
-                  {% if messages %}
-                    <ul class="flashes">
-                    {% for message in messages %}
-                      <li>{{ message }}</li>
-                    {% endfor %}
-                    </ul>
-                  {% endif %}
-                {% endwith %}
+                    
         <header class="header">
             <div class="logo">
                 <a href="{{ url_for('main.homepage') }}">ITE2038 Library</a>
@@ -67,7 +59,15 @@
                             <button type="submit" class="btn-primary">검색/정렬</button>
                         </div>
                     </form>
-                </div>
+                </div>{% with messages = get_flashed_messages() %}
+                  {% if messages %}
+                    <ul class="flashes">
+                    {% for message in messages %}
+                      <li>{{ message }}</li>
+                    {% endfor %}
+                    </ul>
+                  {% endif %}
+                {% endwith %}
 
                 <div class="table-scroll-container"> <table class="user-table">
                     <thead>
@@ -89,48 +89,48 @@
                                 <td>{{ book.total_quantity }}</td>
                                 <td>{{ book.available_quantity }}</td>
                                 <td>
-                                    {# 로그인 상태일 때만 버튼 표시 #}
+                                    
                                     {% if session.user_id %}
-                                        {# 필요한 상태 변수 설정 #}
+                                        
                                         {% set is_overdue = user_status and user_status.is_overdue %}
                                         {% set is_available = book.available_quantity > 0 %}
                                         {% set already_borrowed = user_status and book.book_code in user_status.borrowed_book_codes %}
                                         {% set max_loans_reached = user_status and user_status.current_loan_count >= 3 %}
                                         {% set already_reserved = book.book_code in user_reservations %}
 
-                                        {# 1. 연체 중인 경우: 모든 버튼 비활성화 #}
+                                        {# 연체#}
                                         {% if is_overdue %}
                                             <span title="연체 중입니다. 반납 후 이용해주세요.">
                                                 <button type="button" class="btn-disabled btn-overdue" disabled>이용 불가</button>
                                             </span>
                                             
-                                        {# 2. 대여 가능한 재고가 있는 경우 #}
+                                        {# 재고 있으면? #}
                                         {% elif is_available %}
-                                            {# 이미 동일 종류 대출 중인 경우 #}
+                                            {# 같은거 대출중#}
                                             {% if already_borrowed %}
                                                 <span title="이미 동일 종류의 책을 대출 중입니다.">
                                                     <button type="button" class="btn-disabled btn-already-borrowed" disabled>대출 중</button>
                                                 </span>
-                                            {# 최대 대여 권수 도달한 경우 #}
+                                            {# 이미 3개 빌림#}
                                             {% elif max_loans_reached %}
                                                 <span title="최대 3권까지 대출 가능합니다.">
                                                     <button type="button" class="btn-disabled btn-max-loans" disabled>대출 불가</button>
                                                 </span>
-                                            {# 대출 가능! #}
+                                            {# 대출 #}
                                             {% else %}
                                                 <form method="POST" action="{{ url_for('main.borrow', book_code=book.book_code) }}" class="borrow-form">
                                                     <button type="submit" class="btn-primary btn-borrow">대출</button>
                                                 </form>
                                             {% endif %}
 
-                                        {# 3. 대여 가능한 재고가 없는 경우 (예약 가능성 확인) #}
+                                        {# 재고 없으면 #}
                                         {% else %}
                                             {# 이미 예약한 경우 #}
                                             {% if already_reserved %}
                                                 <span title="이미 예약하신 도서입니다.">
                                                     <button type="button" class="btn-disabled btn-already-reserved" disabled>예약됨</button>
                                                 </span>
-                                            {# 예약 가능! #}
+                                            {# 예약 #}
                                             {% else %}
                                                 <form method="POST" action="{{ url_for('main.reserve', book_code=book.book_code) }}" class="reserve-form">
                                                     <button type="submit" class="btn-secondary btn-reserve">예약</button>

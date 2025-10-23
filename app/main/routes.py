@@ -20,7 +20,7 @@ def allbookspage():
 
     all_book_list = db.get_all_books(
         search_query=search_term, 
-        sort_by=sort_column, 
+        sort_by=sort_column,
         sort_order=sort_direction
     )
 
@@ -39,8 +39,8 @@ def allbookspage():
     
 @main_bp.route('/topbooks')
 def topbookspage():
-    top_books = db.get_popular_books_last_3_months(limit=10) # 상위 10권
-    top_categories = db.get_popular_categories_last_3_months(limit=5) # 상위 5개 카테고리
+    top_books = db.get_popular_books_last_3_months(limit=10) 
+    top_categories = db.get_popular_categories_last_3_months(limit=5) 
     
     return render_template('main/topbooks.html', top_books=top_books, top_categories=top_categories)
 
@@ -48,7 +48,7 @@ def topbookspage():
 
 @main_bp.route('/borrow/<int:book_code>', methods=['POST'])
 def borrow(book_code):
-    # 1. 로그인 확인
+
     if 'user_id' not in session:
         flash("로그인이 필요한 서비스입니다.", "error")
         return redirect(url_for('auth.login'))
@@ -56,7 +56,7 @@ def borrow(book_code):
     user_id = session['user_id']
     user_status = db.get_user_borrowing_status(user_id)
 
-    # 2. 대출 규칙 검사
+    
     if user_status['is_overdue']:
         flash("연체 중인 도서가 있어 대출할 수 없습니다. 먼저 반납해주세요.", "error")
         return redirect(request.referrer or url_for('main.homepage'))
@@ -67,29 +67,29 @@ def borrow(book_code):
         flash("이미 동일한 종류의 책을 대출 중입니다.", "error")
         return redirect(request.referrer or url_for('main.homepage'))
 
-    # 3. 대출 가능한 책 찾기
+    
     available_copy_id = db.find_available_copy(book_code)
-    # 4. 예약자 우선 처리 (✨ 여기가 핵심!)
+    
     oldest_reserver_id = db.get_oldest_reservation_user(book_code)
 
-    # 4-1. 예약자가 있고, 대출 가능한 책이 방금 반납된 예약 도서일 경우
+    #예약자가 있을 떄?
     if oldest_reserver_id is not None and available_copy_id is not None:
-        # 현재 대출 시도자가 가장 먼저 예약한 사람이 아니라면, 대출 불가
+        # 본인이 젤 빠른 예약 아니면 안돼
         if oldest_reserver_id != user_id:
             flash("해당 도서는 다른 사용자가 먼저 예약하여 대출할 수 없습니다.", "warning")
-            return redirect(request.referrer or url_for('books.all_books'))
-        # 현재 대출 시도자가 가장 먼저 예약한 사람이라면, 대출 진행 (아래 4-2로 넘어감)
+            return redirect(request.referrer or url_for('main.all_books'))
         
-    # 4-2. 예약자가 없거나, 대출 시도자가 예약자 본인일 경우 대출 진행
+        
+    # 아니면 대출 가능
     elif available_copy_id is None:
         flash("해당 도서의 대출 가능한 재고가 없습니다.", "error")
-        return redirect(request.referrer or url_for('books.all_books'))
+        return redirect(request.referrer or url_for('main.all_books'))
 
-    # 5. 대출 실행
+#대출
     try:
         db.borrow_book(user_id, available_copy_id)
         
-        # 5-1. 만약 이 사용자가 예약자였다면, 예약 기록 삭제 (✨ 여기가 핵심!)
+        # 필요하면 예약 기록 삭제
         if oldest_reserver_id == user_id:
             db.delete_reservation(user_id, book_code)
             flash("예약하신 도서 대출에 성공했습니다!", "success")
@@ -99,12 +99,12 @@ def borrow(book_code):
     except Exception as e:
         flash(f"대출 처리 중 오류가 발생했습니다: {e}", "error")
 
-    # 6. 이전 페이지로 리다이렉트
-    return redirect(request.referrer or url_for('books.all_books'))
+
+    return redirect(request.referrer or url_for('main.all_books'))
 
 @main_bp.route('/reserve/<int:book_code>', methods=['POST'])
 def reserve(book_code):
-    # 1. 로그인 확인
+
     if 'user_id' not in session:
         flash("로그인이 필요한 서비스입니다.", "error")
         return redirect(url_for('auth.login'))
@@ -112,28 +112,26 @@ def reserve(book_code):
     user_id = session['user_id']
     user_status = db.get_user_borrowing_status(user_id)
 
-    # 2. 예약 규칙 검사
+
     if user_status['is_overdue']:
         flash("연체 중인 도서가 있어 예약할 수 없습니다.", "error")
         return redirect(request.referrer or url_for('main.allbooks'))
 
-    # 3. 실제 재고 확인 (혹시 모를 상황 대비)
+
     available_copy_id = db.find_available_copy(book_code)
     if available_copy_id:
         flash("현재 대출 가능한 재고가 있어 예약할 수 없습니다. 바로 대출해주세요.", "warning")
         return redirect(request.referrer or url_for('main.allbooks'))
         
-    # 4. 이미 예약했는지 확인
+    # 이미 예약?
     if db.check_existing_reservation(user_id, book_code):
         flash("이미 해당 도서를 예약하셨습니다.", "warning")
         return redirect(request.referrer or url_for('main.allbooks'))
             
-    # 5. 예약 실행
     try:
         db.add_reservation(user_id, book_code)
         flash("도서 예약에 성공했습니다!", "success")
     except Exception as e:
         flash(f"예약 처리 중 오류가 발생했습니다: {e}", "error")
 
-    # 6. 이전 페이지로 리다이렉트
     return redirect(request.referrer or url_for('main.allbooks'))

@@ -176,7 +176,7 @@ INSERT INTO book_category(book_code, category_id) VALUES(18, 1); -- 아르테미
 INSERT INTO book_category(book_code, category_id) VALUES(18, 2);
 
 -- 대출 기록 데이터 (현재 대출중인 책 + 과거 기록)
--- 현재 대출중인 책들 (is_rent가 TRUE인 book_id와 일치)
+-- 현재 대출중인 책들
 INSERT INTO rent(book_id, user_id, rent_date) VALUES(9, 1, '2025-10-01 09:00:00'); -- 이기적유전자
 INSERT INTO rent(book_id, user_id, rent_date) VALUES(1, 3, '2025-10-11 10:00:00'); -- 모래 언덕
 INSERT INTO rent(book_id, user_id, rent_date) VALUES(4, 4, '2025-10-05 14:00:00'); -- 파운데이션
