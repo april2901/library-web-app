@@ -1,5 +1,5 @@
 
-USE 'april2901hanyang$default';
+USE april2901hanyang$init;
 
 create table users(
     user_id int auto_increment primary key ,
