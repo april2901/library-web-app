@@ -209,6 +209,5 @@ INSERT INTO rent(book_id, user_id, rent_date, return_date) VALUES(17, 7, '2025-0
 INSERT INTO reservation(book_code, user_id) VALUES(3, 4); -- 1984 (user 4가 예약)
 INSERT INTO reservation(book_code, user_id) VALUES(3, 7); -- 1984 (user 7도 예약)
 INSERT INTO reservation(book_code, user_id) VALUES(4, 2); -- 멋진 신세계 (user 2가 예약)
-INSERT INTO reservation(book_code, user_id) VALUES(5, 1); -- 이기적 유전자 (user 1이 예약)
 INSERT INTO reservation(book_code, user_id) VALUES(16, 8); -- 마션 (user 8이 예약)
 INSERT INTO reservation(book_code, user_id) VALUES(16, 3); -- 마션 (user 3도 예약)

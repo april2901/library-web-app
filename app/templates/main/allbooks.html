@@ -89,65 +89,61 @@
                                 <td>{{ book.total_quantity }}</td>
                                 <td>{{ book.available_quantity }}</td>
                                 <td>
-                                    
-                                    {% if session.user_id %}
+                                {# 로그인 상태일 때만 버튼 표시 #}
+                                {% if session.user_id %}
+                                    {# 필요한 상태 변수 설정 #}
+                                    {% set is_overdue = user_status and user_status.is_overdue %}
+                                    {% set is_available = book.available_quantity > 0 %}
+                                    {% set already_borrowed = user_status and book.book_code in user_status.borrowed_book_codes %}
+                                    {% set max_loans_reached = user_status and user_status.current_loan_count >= 3 %}
+                                    {% set already_reserved = book.book_code in user_reservations %}
+
+                                    {# --- 조건 확인 순서 변경 --- #}
+
+                                    {# 1. 연체 중인가? #}
+                                    {% if is_overdue %}
+                                        <span title="연체 중입니다. 반납 후 이용해주세요.">
+                                            <button type="button" class="btn-disabled btn-overdue" disabled>이용 불가</button>
+                                        </span>
+
+                                    {# 2. 책을 대출 중인가? #}
+                                    {% elif already_borrowed %}
+                                        <span title="이미 동일 종류의 책을 대출 중입니다.">
+                                            <button type="button" class="btn-disabled btn-already-borrowed" disabled>대출 중</button>
+                                        </span>
                                         
-                                        {% set is_overdue = user_status and user_status.is_overdue %}
-                                        {% set is_available = book.available_quantity > 0 %}
-                                        {% set already_borrowed = user_status and book.book_code in user_status.borrowed_book_codes %}
-                                        {% set max_loans_reached = user_status and user_status.current_loan_count >= 3 %}
-                                        {% set already_reserved = book.book_code in user_reservations %}
+                                    {# 3. 책을 예약 중인가? #}
+                                    {% elif already_reserved %}
+                                        <span title="이미 예약하신 도서입니다.">
+                                            <button type="button" class="btn-disabled btn-already-reserved" disabled>예약됨</button>
+                                        </span>
 
-                                        {# 연체#}
-                                        {% if is_overdue %}
-                                            <span title="연체 중입니다. 반납 후 이용해주세요.">
-                                                <button type="button" class="btn-disabled btn-overdue" disabled>이용 불가</button>
+                                    {# 4. 대출 가능한 재고가 있는가? #}
+                                    {% elif is_available %}
+                                        {# 최대 대여 권수에 도달했는가? #}
+                                        {% if max_loans_reached %}
+                                            <span title="최대 3권까지 대출 가능합니다.">
+                                                <button type="button" class="btn-disabled btn-max-loans" disabled>대출 불가</button>
                                             </span>
-                                            
-                                        {# 재고 있으면? #}
-                                        {% elif is_available %}
-                                            {# 같은거 대출중#}
-                                            {% if already_borrowed %}
-                                                <span title="이미 동일 종류의 책을 대출 중입니다.">
-                                                    <button type="button" class="btn-disabled btn-already-borrowed" disabled>대출 중</button>
-                                                </span>
-                                            {# 이미 3개 빌림#}
-                                            {% elif max_loans_reached %}
-                                                <span title="최대 3권까지 대출 가능합니다.">
-                                                    <button type="button" class="btn-disabled btn-max-loans" disabled>대출 불가</button>
-                                                </span>
-                                            {# 대출 #}
-                                            {% else %}
-                                                <form method="POST" action="{{ url_for('main.borrow', book_code=book.book_code) }}" class="borrow-form">
-                                                    <button type="submit" class="btn-primary btn-borrow">대출</button>
-                                                </form>
-                                            {% endif %}
-
-                                        {# 재고 없으면 #}
+                                        {# 모든 조건을 통과 -> 대출 #}
                                         {% else %}
-                                            {# 같은거 대출중#}
-                                            {% if already_borrowed %}
-                                                <span title="이미 동일 종류의 책을 대출 중입니다.">
-                                                    <button type="button" class="btn-disabled btn-already-borrowed" disabled>대출 중</button>
-                                                </span>
-                                            {# 이미 예약한 경우 #}
-                                            {% if already_reserved %}
-                                                <span title="이미 예약하신 도서입니다.">
-                                                    <button type="button" class="btn-disabled btn-already-reserved" disabled>예약됨</button>
-                                                </span>
-                                            {# 예약 #}
-                                            {% else %}
-                                                <form method="POST" action="{{ url_for('main.reserve', book_code=book.book_code) }}" class="reserve-form">
-                                                    <button type="submit" class="btn-secondary btn-reserve">예약</button>
-                                                </form>
-                                            {% endif %}
+                                            <form method="POST" action="{{ url_for('main.borrow', book_code=book.book_code) }}" class="borrow-form">
+                                                <button type="submit" class="btn-primary btn-borrow">대출</button>
+                                            </form>
                                         {% endif %}
-                                            
-                                    {# 로그아웃 상태일 때 #}
+
+                                    {# 5. 위의 모든 조건에 해당하지 않음 -> 재고가 없고, 내가 빌리거나 예약하지도 않음 -> 예약 가능! #}
                                     {% else %}
-                                        <a href="{{ url_for('auth.login') }}" class="btn">로그인 필요</a>
+                                        <form method="POST" action="{{ url_for('main.reserve', book_code=book.book_code) }}" class="reserve-form">
+                                            <button type="submit" class="btn-secondary btn-reserve">예약</button>
+                                        </form>
                                     {% endif %}
-                                </td>
+                                        
+                                {# 로그아웃 상태일 때 #}
+                                {% else %}
+                                    <a href="{{ url_for('auth.login') }}" class="btn">로그인 필요</a>
+                                {% endif %}
+                            </td>
                             </tr>
                             {% else %}
                             <tr>

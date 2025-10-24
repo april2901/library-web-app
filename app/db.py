@@ -404,7 +404,7 @@ def delete_reservation(user_id, book_code):
 def get_oldest_reservation_user(book_code):
     query = """
         SELECT user_id FROM reservation 
-        WHERE book_code = %s ㄱㅂㅂrereㅎ
+        WHERE book_code = %s
         ORDER BY reservation_date ASC 
         LIMIT 1;
     """
